@@ -1,24 +1,38 @@
 from django.contrib import admin
-from .models import Post, Comment
+from .models import Assignment, UserAssignment, Comment, Goal, GoalTask
 
-
+# --- Comment inline prie UserAssignment ---
 class CommentInline(admin.TabularInline):
     model = Comment
-    extra = 0
-
-
-class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'created')
-    inlines = [CommentInline]
+    extra = 1
     readonly_fields = ('created',)
-    list_filter = ('author','created',)
-    search_fields = ('title', 'content', 'author__username')
 
 
-    fieldsets = [
-        ('General', {'fields': ('title', 'content', 'author', 'created')})
-    ]
+# --- UserAssignment admin ---
+@admin.register(UserAssignment)
+class UserAssignmentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'assignment', 'is_shared', 'created')
+    list_filter = ('is_shared', 'created')
+    search_fields = ('user__username', 'assignment__title')
+    inlines = [CommentInline]
 
 
-# Register your models here.
-admin.site.register(Post, PostAdmin)
+# --- Assignment admin ---
+@admin.register(Assignment)
+class AssignmentAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created')
+    search_fields = ('title',)
+
+
+# --- GoalTask inline prie Goal ---
+class GoalTaskInline(admin.TabularInline):
+    model = GoalTask
+    extra = 1
+
+
+# --- Goal admin ---
+@admin.register(Goal)
+class GoalAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'created')
+    search_fields = ('title', 'user__username')
+    inlines = [GoalTaskInline]
